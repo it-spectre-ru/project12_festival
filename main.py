@@ -17,8 +17,8 @@ proxies = {
 # collect all fest URL
 fest_urls_list = []
 
-# for i in range(0, 192, 24):
-for i in range(0, 24, 24):
+for i in range(0, 192, 24):
+# for i in range(0, 24, 24):
   url = f'https://www.skiddle.com/festivals/search/?ajaxing=1&sort=0&fest_name=&from_date=24%20Jan%202021&to_date=&where%5B%5D=2&where%5B%5D=3&where%5B%5D=4&where%5B%5D=6&where%5B%5D=7&where%5B%5D=8&where%5B%5D=9&where%5B%5D=10&maxprice=500&o={i}&bannertitle=May'
   
   req = requests.get(url=url, headers=headers, proxies=proxies)
@@ -39,7 +39,13 @@ for i in range(0, 24, 24):
     fest_urls_list.append(fest_url)
 
 #collect fest info
-for url in fest_urls_list[0:1]:
+
+count = 0
+fest_list_result = []
+for url in fest_urls_list:
+  count += 1
+  print(count)
+  print(url)
 
   req = requests.get(url=url, headers=headers, proxies=proxies)
 
@@ -58,12 +64,32 @@ for url in fest_urls_list[0:1]:
     contact_details = soup.find('h2', string='Venue contact details and info').find_next()
     items = [item.text for item in contact_details.find_all('p')]
 
+
+    contact_details_dict = {}
     for contact_details in items:
-      print(contact_details)
+      contact_detail_list = contact_details.split(':')
+
+      if (contact_detail_list) == 3:
+        contact_details_dict[contact_detail_list[0].strip()] = contact_detail_list[1].strip() + ':' \
+          + contact_detail_list[2].strip()
+      else:
+          contact_details_dict[contact_detail_list[0].strip()] = contact_detail_list[1].strip()
+
+    fest_list_result.append(
+      {
+        'Fest name': fest_name,
+        'Fest date': fest_date,
+        'Contacts data': contact_details_dict
+      }
+    )
 
 
 
   except Exception as ex:
     print(ex)
     print('Errr///')
+
+
+with open('fest_list_result.json', 'a', encoding='utf-8') as file:
+  json.dump(fest_list_result, file, indent=4, ensure_ascii=False)
 
