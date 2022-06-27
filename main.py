@@ -38,5 +38,32 @@ for i in range(0, 24, 24):
     fest_url = 'https://www.skiddle.com' + item.get('href')
     fest_urls_list.append(fest_url)
 
-print(fest_urls_list)
+#collect fest info
+for url in fest_urls_list[0:1]:
+
+  req = requests.get(url=url, headers=headers, proxies=proxies)
+
+  try:
+    soup = BeautifulSoup(req.text, 'lxml')
+    fest_info_block = soup.find('div', class_='top-info-cont')
+
+    fest_name = fest_info_block.find('h1').text.strip()
+    fest_date = fest_info_block.find('h3').text.strip()
+    fest_location_url = 'https://www.skiddle.com' + fest_info_block.find('a', class_='tc-white').get('href')
+
+    # get contact details and info 
+    req = requests.get(url=fest_location_url, headers=headers, proxies=proxies)
+    soup = BeautifulSoup(req.text, 'lxml')
+
+    contact_details = soup.find('h2', string='Venue contact details and info').find_next()
+    items = [item.text for item in contact_details.find_all('p')]
+
+    for contact_details in items:
+      print(contact_details)
+
+
+
+  except Exception as ex:
+    print(ex)
+    print('Errr///')
 
